@@ -1,55 +1,18 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define DEFAULT_STR_LENGTH 1024
+#define DEFAULT_STR_LENGTH 256
 
 typedef enum { false, true } bool;
-
-typedef struct {
-  int num;
-  bool status;
-} int_nstd;
-
-bool isPartOfInt(char sym) {
-  if ((((int)sym < 48) || ((int)sym > 57)) && (sym != '-'))
-    return false;
-  return true;
-}
-
-int_nstd scanInt() {
-  // удобная функция для ввода числа
-  int_nstd fns = {0, true};
-  char number[30];
-  fgets(number, 30, stdin);
-  fns.num = strtof(number, 0);
-  fns.status = isPartOfInt(number[0]);
-  return fns;
-}
-
-//int main() {
-//  printf("Программа раскрашивания карты минимальным количеством цветов.\n");
-//  printf("Вводите новые страны, затем оставьте строку ввода пустой.\n");
-//  unsigned int i = 1;
-//  printf("%ui) Страна: ", i);
-//  char *str = (char *)malloc(DEFAULT_STR_LENGTH * sizeof(char));
-//  fgets(str, DEFAULT_STR_LENGTH, stdin);
-//  printf("\tСоседи (вводите страны через запятую): ");
-//  return 0;
-//}
-
-//Последовательная раскраска вершин графа при помощи
-//обхода графа в глубину.
-//Граф представлен структурой Вирта.
-typedef int Boolean;
 typedef struct L *Lref; // Тип: указатель на заголовочный узел.
 typedef struct T *Tref; // Тип: указатель на дуговой узел.
+
 //Описание типа заголовочного узла.
 typedef struct L {
-  int Key;           //Имя заголовочного узла.
-  char* CountryName; //Имя страны.
+  char *CountryName; //Имя страны.
   int Color;         //Цвет раскраски.
   int Count;         //Количество предшественников.
-  Boolean Flag;      //Флаг посещения узла при обходе.
+  bool Flag;         //Флаг посещения узла при обходе.
   Tref Trail;        //Указатель на список смежности.
   Lref Next;         //Указатель на следующий узел в списке заголовочных узлов.
 } L;
@@ -65,7 +28,7 @@ Lref Tail; //Указатель на фиктивный элемент
            // в конце списка заголовочных узлов.
 int MSet[256]; //Вспомогательное множество, содер-
                //жащее 0,1,2...,n.
-void SearchGraph(int, Lref *);
+void SearchGraph(char *, Lref *);
 Lref GetHead() { return Head; }
 Lref GetTail() { return Tail; }
 void MakeGraph();
@@ -73,45 +36,90 @@ void PrintGraph();
 void Color(Lref, int);
 void Postr(int);
 
-void Postr(int n)
-//Построение вспомогательного множества MSet.
-{
+bool isEndOfString(char sym) {
+  //Проверка на конец строки.
+  if ((sym == '\0') || (sym == '\n') || ((int)sym == 10))
+    return true;
+  return false;
+}
+
+char *scanString() {
+  //Ввод строки.
+  char *str = malloc(DEFAULT_STR_LENGTH * sizeof(char));
+  fgets(str, DEFAULT_STR_LENGTH, stdin);
+  int cntr = 0;
+  for (int i = 0; i < DEFAULT_STR_LENGTH; i++) {
+    if (!isEndOfString(str[i]))
+      cntr++;
+    else
+      break;
+  }
+  char *k = malloc((cntr + 1) * sizeof(char));
+  for (int i = 0; i < cntr; i++)
+    k[i] = str[i];
+  k[cntr] = '\0';
+  free(str);
+  return k;
+}
+
+bool isEqual(char str1[], char str2[]) {
+  //Сравнение строк.
+  unsigned short int len1 = DEFAULT_STR_LENGTH, len2 = DEFAULT_STR_LENGTH;
+  for (int i = 0; i < DEFAULT_STR_LENGTH; i++)
+    if (isEndOfString(str1[i])) {
+      len1 = i - 1;
+      break;
+    }
+  for (int i = 0; i < DEFAULT_STR_LENGTH; i++)
+    if (isEndOfString(str2[i])) {
+      len2 = i - 1;
+      break;
+    }
+  if (len1 != len2)
+    return false;
+  bool isEqual = true;
+  for (int i = 0; i < len1; i++)
+    if (str1[i] != str2[i])
+      isEqual = false;
+  return isEqual;
+}
+
+void Postr(int n) {
+  //Построение вспомогательного множества MSet.
   for (int i = 0; i < 256; i++)
     MSet[i] = (i <= n) ? 1 : 0;
 }
 
-void SearchGraph(int w, Lref *h)
-//Функция возвращает указатель на заголовочный узел
-//с ключом w в графе, заданном структурой Вирта с указателем Head.
-{
+void SearchGraph(char *w, Lref *h) {
+  //Функция возвращает указатель на заголовочный узел
+  //с ключом w в графе, заданном структурой Вирта с указателем Head.
   *h = Head;
-  (*Tail).Key = w;
-  while ((**h).Key != w)
+  (*Tail).CountryName = w;
+  while (!isEqual((**h).CountryName, w))
     *h = (**h).Next;
   if (*h == Tail)
   //В списке заголовочных узлов нет узла с ключом w.
   //Поместим его в конец списка Head.
   {
-    Tail = (L*) malloc(sizeof(L)); //new (L);
+    Tail = (L *)malloc(sizeof(L)); // new (L);
     (**h).Count = 0;
     (**h).Trail = NULL;
     (**h).Next = Tail;
   }
 }
 
-void MakeGraph()
-//Функция возвращает указатель Head на структуру
-//Вирта, соответствующую ориентированному графу.
-{
-  int x, y;
-  Lref p, q;   //Рабочие указатели.
-  Tref t, r;   //Рабочие указатели.
-  Boolean Res; //Флаг наличия дуги.
-  printf("Вводите начальную вершину дуги: ");
-  scanf("%d", &x); //cin >> x;
-  while (x != 0) {
-    printf("Вводите конечную вершину дуги: ");
-    scanf("%d", &y);
+void MakeGraph() {
+  //Функция возвращает указатель Head на структуру
+  //Вирта, соответствующую ориентированному графу.
+  char *x, *y;
+  Lref p, q; //Рабочие указатели.
+  Tref t, r; //Рабочие указатели.
+  bool Res;  //Флаг наличия дуги.
+  printf("Введите название страны: ");
+  x = scanString();
+  while (!isEndOfString(x[0])) {
+    printf("Введите соседа: ");
+    y = scanString();
     //Определим, существует ли в графе дуга (x,y)?
     SearchGraph(x, &p);
     SearchGraph(y, &q);
@@ -124,48 +132,45 @@ void MakeGraph()
         r = (*r).Next;
     if (!Res) //Если дуга отсутствует, то поместим её в граф.
     {
-      t = (T*) malloc(sizeof(T)); //new (T);
+      t = (T *)malloc(sizeof(T)); // new (T);
       (*t).Id = q;
       (*t).Next = (*p).Trail;
       (*p).Trail = t;
       (*q).Count++;
     }
     printf("Вводите начальную вершину дуги: ");
-    scanf("%d", &x);
+    x = scanString();
   }
 }
 
-void PrintGraph()
-//Вывод структуры Вирта, заданной указателем
-// Head и соответствующей ориентированному графу.
-{
+void PrintGraph() {
+  //Вывод структуры Вирта, заданной указателем Head и соответствующей
+  //ориентированному графу.
   Lref p; //Рабочий указатель.
   Tref q; //Рабочий указатель.
-
   p = Head;
   while (p != Tail) {
-    printf("%d(", (*p).Key);
+    printf("%s(", (*p).CountryName);
     q = (*p).Trail;
     while (q != NULL) {
-      printf("%d ", (*(*q).Id).Key);
+      printf("%s ", (*(*q).Id).CountryName);
       q = (*q).Next;
     }
-    printf(")");//cout << ")";
+    printf(")"); // cout << ")";
     p = (*p).Next;
     printf(" ");
   }
 }
 
-void Color(Lref r, int n)
-//Последовательная раскраска графа при помощи
-//рекурсивного обхода графа в глубину.
-// r - указатель на структуру Вирта.
-// MSet - глобальное множество.
-// n    - количество вершин в графе.
-{
+void Color(Lref r, int n) {
+  //Последовательная раскраска графа при помощи
+  //рекурсивного обхода графа в глубину.
+  // r    - указатель на структуру Вирта.
+  // MSet - глобальное множество.
+  // n    - количество вершин в графе.
   Tref t, t1;
   int i; //Параметр цикла.
-  Boolean Fl;
+  bool Fl;
 
   t = r->Trail;
   r->Flag = false;
@@ -186,7 +191,7 @@ void Color(Lref r, int n)
     else
       i++;
   r->Color = i; //Цвет присвоен!
-  printf("(%d,%d) ", r->Key, r->Color);
+  printf("(%s,%d) ", r->CountryName, r->Color);
   //Восстановление вспомогательного множества MSet.
   for (i = 0; i < 256; MSet[i++] = 0)
     ;
@@ -201,10 +206,13 @@ void Color(Lref r, int n)
 }
 
 int main() {
+  //Последовательная раскраска вершин графа при помощи
+  //обхода графа в глубину.
+  //Граф представлен структурой Вирта.
   Lref t;    //Рабочий указатель для перемещения
              // по списку заголовочных звеньев.
   int n = 0; //Количество вершин в графе.
-  Head = Tail = (L*) malloc(sizeof(L));// new (L);
+  Head = Tail = (L *)malloc(sizeof(L)); // new (L);
   //Построение графа и вывод его структуры Вирта.
   MakeGraph();
   PrintGraph();
