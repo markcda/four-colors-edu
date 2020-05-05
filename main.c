@@ -6,6 +6,7 @@
 typedef enum { false, true } bool;
 typedef struct L *Lref; // Тип: указатель на заголовочный узел.
 typedef struct T *Tref; // Тип: указатель на дуговой узел.
+char colors[4][20] = {"зелёный\0", "красный\0", "жёлтый\0" ,"синий\0"};
 
 //Описание типа заголовочного узла.
 typedef struct L {
@@ -62,17 +63,17 @@ char *scanString() {
   return k;
 }
 
-bool isEqual(char str1[], char str2[]) {
+bool isEqual(char *str1, char *str2) {
   //Сравнение строк.
   unsigned short int len1 = DEFAULT_STR_LENGTH, len2 = DEFAULT_STR_LENGTH;
   for (int i = 0; i < DEFAULT_STR_LENGTH; i++)
     if (isEndOfString(str1[i])) {
-      len1 = i - 1;
+      len1 = i;
       break;
     }
   for (int i = 0; i < DEFAULT_STR_LENGTH; i++)
     if (isEndOfString(str2[i])) {
-      len2 = i - 1;
+      len2 = i;
       break;
     }
   if (len1 != len2)
@@ -209,7 +210,7 @@ void Color(Lref r, int n) {
     else
       i++;
   r->Color = i; //Цвет присвоен!
-  printf("(%s,%d) ", r->CountryName, r->Color);
+  printf("%s - %s\n", r->CountryName, colors[r->Color]);
   //Восстановление вспомогательного множества MSet.
   for (i = 0; i < 256; MSet[i++] = 0)
     ;
@@ -246,8 +247,7 @@ int main() {
   // ------------------------------------
   //Построение вспомогательного множества MSet.
   Postr(n);
-  printf("Результат раскраски: ");
+  printf("Результат раскраски:\n");
   Color(GetHead(), n);
-  printf("\n");
   return 0;
 }
