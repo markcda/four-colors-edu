@@ -138,7 +138,25 @@ void MakeGraph() {
       (*p).Trail = t;
       (*q).Count++;
     }
-    printf("Вводите начальную вершину дуги: ");
+    //Определим, существует ли в графе дуга (y,x) (обратная)?
+    SearchGraph(y, &p);
+    SearchGraph(x, &q);
+    r = (*p).Trail;
+    Res = false;
+    while ((r != NULL) && (!Res))
+      if ((*r).Id == q)
+        Res = true;
+      else
+        r = (*r).Next;
+    if (!Res) //Если дуга отсутствует, то поместим её в граф.
+    {
+      t = (T *)malloc(sizeof(T)); // new (T);
+      (*t).Id = q;
+      (*t).Next = (*p).Trail;
+      (*p).Trail = t;
+      (*q).Count++;
+    }
+    printf("Введите название страны: ");
     x = scanString();
   }
 }
@@ -150,16 +168,17 @@ void PrintGraph() {
   Tref q; //Рабочий указатель.
   p = Head;
   while (p != Tail) {
-    printf("%s(", (*p).CountryName);
+    printf("%s( ", (*p).CountryName);
     q = (*p).Trail;
     while (q != NULL) {
       printf("%s ", (*(*q).Id).CountryName);
       q = (*q).Next;
     }
-    printf(")"); // cout << ")";
+    printf(")");
     p = (*p).Next;
     printf(" ");
   }
+  printf("\n");
 }
 
 void Color(Lref r, int n) {
@@ -171,7 +190,6 @@ void Color(Lref r, int n) {
   Tref t, t1;
   int i; //Параметр цикла.
   bool Fl;
-
   t = r->Trail;
   r->Flag = false;
   //Сейчас мы находимся в вершине r->Key.
