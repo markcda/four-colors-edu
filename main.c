@@ -34,7 +34,7 @@ void SearchGraph(char *, Lref *);
 Lref GetHead() { return Head; }
 Lref GetTail() { return Tail; }
 void MakeGraph();
-void PrintGraph();
+// void PrintGraph();
 void Color(Lref, int);
 void Postr(int);
 
@@ -163,25 +163,25 @@ void MakeGraph() {
   }
 }
 
-void PrintGraph() {
-  // Вывод структуры Вирта, заданной указателем Head и соответствующей
-  // ориентированному графу.
-  Lref p; // Рабочий указатель.
-  Tref q; // Рабочий указатель.
-  p = Head;
-  while (p != Tail) {
-    printf("%s( ", (*p).CountryName);
-    q = (*p).Trail;
-    while (q != NULL) {
-      printf("%s ", (*(*q).Id).CountryName);
-      q = (*q).Next;
-    }
-    printf(")");
-    p = (*p).Next;
-    printf(" ");
-  }
-  printf("\n");
-}
+// void PrintGraph() {
+//  // Вывод структуры Вирта, заданной указателем Head и соответствующей
+//  // ориентированному графу.
+//  Lref p; // Рабочий указатель.
+//  Tref q; // Рабочий указатель.
+//  p = Head;
+//  while (p != Tail) {
+//    printf("%s( ", (*p).CountryName);
+//    q = (*p).Trail;
+//    while (q != NULL) {
+//      printf("%s ", (*(*q).Id).CountryName);
+//      q = (*q).Next;
+//    }
+//    printf(")");
+//    p = (*p).Next;
+//    printf(" ");
+//  }
+//  printf("\n");
+//}
 
 void Color(Lref r, int n) {
   // Последовательная раскраска графа при помощи
@@ -227,19 +227,31 @@ void Color(Lref r, int n) {
   }
 }
 
+void shell() {
+  printf("Программа для раскраски карты в минимальное число цветов.\n");
+  printf("[Как пользоваться] Вводите страны-соседи в два этапа:\n");
+  printf("1) введите первую страну\n");
+  printf("2) введите её соседа (по одному за раз)\n");
+  printf("Если вы указали страну A соседом страны B, то указывать, что страна "
+         "B - сосед страны A, необязательно.\n");
+  printf("Когда закончите ввод, оставьте строку ввода первой страны пустой и "
+         "нажмите Enter.\n\n");
+}
+
 int main() {
   // Последовательная раскраска вершин графа при помощи
   // обхода графа в глубину.
   // Граф представлен структурой Вирта.
-  // setlocale(LC_ALL, "Rus");
-  // system("chcp 1251 > nul");
+  setlocale(LC_ALL, "Rus");
+  system("chcp 1251 > nul");
+  shell();
   Lref t;    // Рабочий указатель для перемещения
              // по списку заголовочных звеньев.
   int n = 0; // Количество вершин в графе.
   Head = Tail = (L *)malloc(sizeof(L)); // new (L);
   // Построение графа и вывод его структуры Вирта.
   MakeGraph();
-  PrintGraph();
+  // PrintGraph();
   // Раскраска с помощью рекурсивного обхода графа в глубину.
   // Инициализация.
   t = GetHead(); // Установлен рабочий указатель.
@@ -252,7 +264,7 @@ int main() {
   // ------------------------------------
   // Построение вспомогательного множества MSet.
   Postr(n);
-  printf("Результат раскраски:\n");
+  printf("\nРезультат раскраски:\n");
   Color(GetHead(), n);
   printf("Всего было использовано цветов: %d\n", total);
   return 0;
