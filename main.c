@@ -204,7 +204,7 @@ void Color(Lref r, int n) {
   }
   // Выбор цвета вершины: это "первый" элемент множества MSet.
   Fl = true;
-  i = 1;
+  i = 0;
   while (Fl)
     if (MSet[i])
       Fl = false;
@@ -213,7 +213,8 @@ void Color(Lref r, int n) {
   r->Color = i; //Цвет присвоен!
   if (i > total)
     total = i;
-  printf("%s - %s\n", r->CountryName, colors[r->Color]);
+  if (!isEndOfString(r->CountryName[0]))
+    printf("%s - %s\n", r->CountryName, colors[r->Color]);
   // Восстановление вспомогательного множества MSet.
   for (i = 0; i < 256; MSet[i++] = 0)
     ;
@@ -266,6 +267,6 @@ int main() {
   Postr(n);
   printf("\nРезультат раскраски:\n");
   Color(GetHead(), n);
-  printf("Всего было использовано цветов: %d\n", total);
+  printf("Всего было использовано цветов: %d\n", total + 1);
   return 0;
 }
